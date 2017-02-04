@@ -17,20 +17,21 @@ class WallTrace():
     def run(self):
         rate = rospy.Rate(20)
         d = Twist()
+        s = self.sensor_values
     
         accel = 0.02
         while not rospy.is_shutdown():
             d.linear.x += accel
     
-            if self.sensor_values.sum_forward >= 50: d.linear.x = 0.0
-            elif d.linear.x <= 0.2:                  d.linear.x = 0.2
-            elif d.linear.x >= 0.8:                  d.linear.x = 0.8
+            if s.sum_forward >= 50: d.linear.x = 0.0
+            elif d.linear.x <= 0.2: d.linear.x = 0.2
+            elif d.linear.x >= 0.8: d.linear.x = 0.8
     
-            if d.linear.x < 0.2:                    d.angular.z = 0.0
-            elif self.sensor_values.left_side < 10: d.angular.z = 0.0
+            if d.linear.x < 0.2:   d.angular.z = 0.0
+            elif s.left_side < 10: d.angular.z = 0.0
             else:
                 target = 50
-                error = (target - self.sensor_values.left_side)/50.0
+                error = (target - s.left_side)/50.0
                 d.angular.z = error * 3 * math.pi / 180.0
     
             self.cmd_vel.publish(d)
